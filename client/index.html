@@ -1,7 +1,6 @@
 <html>
   <head>
     <title>Retro Scripting</title>
-    <script src="bundle.js"></script>
     <style>
       body {
         font-family: sans-serif;
@@ -25,7 +24,7 @@
         padding: 0.2em;
       }
       .flash-once {
-        animation: flash 1s ease-out forwards;
+        animation: flash 2s ease-out forwards;
       }
 
       @keyframes flash {
@@ -45,43 +44,19 @@
     <table>
       <thead>
         <tr>
-          <th colspan="2">Centarumon</th>
+          <th colspan="2" id="digimon-name"></th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <th>HP</th>
-          <td id="hp"></td>
-        </tr>
-        <tr>
-          <th>Mp</th>
-          <td id="mp"></td>
-        </tr>
-        <tr>
-          <th>Off</th>
-          <td id="off"></td>
-        </tr>
-        <tr>
-          <th>Def</th>
-          <td id="def"></td>
-        </tr>
-        <tr>
-          <th>Speed</th>
-          <td id="speed"></td>
-        </tr>
-        <tr>
-          <th>Brains</th>
-          <td id="brains"></td>
-        </tr>  
-        <tr>
-          <th>Happiness</th>
-          <td id="happiness"></td>
-        </tr>  
-        <tr>
-          <th>Discipline</th>
-          <td id="discipline"></td>
-        </tr>  
+      <tbody id="stats-table">
       </tbody>
     </table>
+
+    <template id="stats-row-template">
+      <tr>
+        <th><slot name="stat-name"></slot></th>
+        <td><slot name="stat-value"></slot></td>
+      </tr>  
+    </template>
   </body>
+  <script type="module" src="main.js"></script>
 </html>

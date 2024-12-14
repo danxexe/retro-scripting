@@ -1,5 +1,5 @@
-const { JSONRPCClient } = require('json-rpc-2.0')
-
+import { JSONRPCClient } from './json-rpc-2.0.js'
+import { digimon_hex_to_name, stats } from './digimon-world.js'
 
 const client = new JSONRPCClient((jsonRPCRequest) =>
   fetch("http://localhost:3030", {
@@ -10,7 +10,6 @@ const client = new JSONRPCClient((jsonRPCRequest) =>
     body: JSON.stringify(jsonRPCRequest),
   }).then((response) => {
     if (response.status === 200) {
-      // Use client.receive when you received a JSON-RPC response.
       return response
         .json()
         .then((jsonRPCResponse) => client.receive(jsonRPCResponse));
@@ -20,11 +19,17 @@ const client = new JSONRPCClient((jsonRPCRequest) =>
   })
 );
 
+const stats_table = document.querySelector("#stats-table");
+const stats_row_template = document.querySelector("#stats-row-template");
+let old_data = {}
+
 async function update () {
   const response = await client.request("read_memory", {
     u8: {
       happiness: 0x13848A,
       discipline: 0x138488,
+      mistakes: 0x13847e,
+      weight: 0x1384a2,
     },
     u16le: {
       digimon: 0x1557b0,
@@ -37,25 +42,32 @@ async function update () {
     }
   });
 
-  console.log(response);
+  const data = {...response["u8"], ...response["u16le"]}
+  const digimon_name = digimon_hex_to_name.get(data["digimon"]);
 
-  const stats = {...response["u8"], ...response["u16le"]}
+  document.querySelector("#digimon-name").innerText = digimon_name;
 
-  for (const property in stats) {
-    const element = document.getElementById(property)
+  for (const prop in stats) {
+    const value = data[prop];
+    const old_value = old_data[prop];
 
-    if (element) {
-      const old = element.innerText
-      element.innerText = stats[property];
-  
-      if (old != element.innerText) {
-        element.classList.add("flash-once");
-        element.addEventListener("animationend", function() {
-          element.classList.remove("flash-once");
-        }, { once: true });
-      }  
-    }
+    if (value != old_value) {
+      const clone = stats_row_template.content.cloneNode(true);
+
+      clone.querySelector("tr").classList.add(prop, "flash-once");
+      clone.querySelector("th").innerText = stats[prop];
+      clone.querySelector("td").innerText = data[prop];
+      
+      const old_element = stats_table.querySelector("tr." + prop);
+      if (old_element) {
+        stats_table.replaceChild(clone, old_element);
+      } else {
+        stats_table.appendChild(clone);
+      }
+    }  
   }
+
+  old_data = data;
 }
 
 function sleep(ms) {
@@ -70,6 +82,7 @@ async function loop() {
       await update();
     } catch (e) {
       run = false
+      console.log(e)
     }
     
     await sleep(1000);
