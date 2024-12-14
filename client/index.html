@@ -38,25 +38,31 @@
           background-color: white;
         }
       }
+
+      .container {
+        display: flex;
+        flex-direction: row;
+      }
+
+      #partner {
+        margin-right: 40px;
+      }
+
+      #evolution-paths {
+        display: flex;
+        flex-direction: row;
+      }
+
+      #evolution-paths table {
+        margin-right: 20px;
+      }
     </style>
   </head>
   <body>
-    <table>
-      <thead>
-        <tr>
-          <th colspan="2" id="digimon-name"></th>
-        </tr>
-      </thead>
-      <tbody id="stats-table">
-      </tbody>
-    </table>
-
-    <template id="stats-row-template">
-      <tr>
-        <th><slot name="stat-name"></slot></th>
-        <td><slot name="stat-value"></slot></td>
-      </tr>  
-    </template>
+    <div class="container">
+      <div id="partner"></div>
+      <div id="evolution-paths"></div>
+    </div>
   </body>
   <script type="module" src="main.js"></script>
 </html>
