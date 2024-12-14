@@ -1,0 +1,14 @@
+[package]
+name = "retro_scripting"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+name = "retro_scripting_libretro"
+
+[dependencies]
+jsonrpc-http-server = "18.0.0"
+libloading = "0.8"
+libretro-rs = "0.1.3"
+serde_json = "1.0.133"
