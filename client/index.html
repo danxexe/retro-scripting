@@ -13,6 +13,9 @@
         background-color: #293942;
         color: #D6D6D6;
       }
+      small {
+        font-size: 0.6em;
+      }
       .table-outer {
         border: 2px solid #8CD6F7;
         margin-right: 20px;
@@ -43,15 +46,30 @@
       td {
         text-align: right;
       }
-      td, th {
+      tr {
         border: 0.1em solid #394A5A;
-        padding: 0.22em 0.2em 0.14em;
+      }
+      td, th {
+        padding: 0.2em 0.2em 0.16em;
       }
       .flash-once {
         animation: flash 2s ease-out forwards;
       }
-      .fulfilled th, .fulfilled td {
+      .fulfilled {
         background-color: #4A39DE;
+      }
+      .not-requirement {
+        opacity: 30%;
+      }
+      tr.stat-brains, tr.stat-mistakes, tr.stat-weight {
+        border-bottom: 0.1em solid #8CD6F7;
+      }
+      tr img {
+        height: 1em;
+        vertical-align: text-top;
+      }
+      tr.stat-partner {
+        border-bottom: none;
       }
 
       @keyframes flash {

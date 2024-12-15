@@ -37,20 +37,22 @@ const objectMap = (obj, fn) =>
 function format_value(value) {
   if (Array.isArray(value)) {
     let [min, max] = value;
-    let space = html`<span style="font-size: 0.5em"> </span>`
+    let space = html`<span style="font-size: 0.5em">&nbsp;</span>`
     min = min == Infinity ? "" : min;
     max = max == Infinity ? "" : max;
     return html`${min}${space}..${space}${max}`;
   }
 
+  if ((typeof value) == "string") return html`<img alt="${value}" title="${value}" src="img/${value}.png">`;
+
   return value;
 }
 
 function is_fulfilled(partner, requirement) {
-  // console.log(partner, requirement)
-  if (requirement == undefined) return "";
+  if (requirement == undefined) return "not-requirement";
   if (typeof requirement == "number" && partner >= requirement) return "fulfilled";
   if (Array.isArray(requirement) && partner >= requirement[0] && partner < requirement[1]) return "fulfilled";
+  if (typeof requirement == "string" && partner == requirement) return "fulfilled";
   return "unfulfilled";
 }
 
@@ -79,7 +81,7 @@ const digimon_template = (name, stats, props, classes = []) => {
 
 html`
   ${() => {
-    const classes = objectMap(stats, (k, _) => "flash-once")
+    const classes = objectMap(stats, (k, _) => [`stat-${k}`, "flash-once"].join(" "))
     return digimon_template(state.partner.name, state.partner, stats, classes);
   }}
 `(document.querySelector("#partner"))
@@ -88,7 +90,7 @@ html`
   ${() => state.evoPaths.map(([name, requirements]) => {
     const classes = objectMap(stats, (k, v) => {
       const fulfilled = is_fulfilled(state.partner[k],  requirements[k]);
-      return fulfilled;
+      return [`stat-${k}`, fulfilled].join(" ");
     });
     return digimon_template(name, requirements, stats, classes);
   })}
@@ -124,9 +126,12 @@ async function update() {
   
   state.partner = reactive({ ...response["u8"], ...response["u16le"] });
   state.partner.name = digimonNames.get(state.partner.digimon_id);
+  state.partner.partner = state.partner.name;
+  // state.partner.partner = "Biyomon";
   state.partner.techs = countTechs(state.partner);
 
   state.evoPaths = evolutionPaths[state.partner.name]
+  // state.evoPaths = evolutionPaths["Biyomon"]
     .map((digimon) => [digimon, evolutionRequirements[digimon]])
     .filter(([_, req]) => req.special == undefined);
 }
