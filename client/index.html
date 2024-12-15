@@ -2,10 +2,22 @@
   <head>
     <title>Retro Scripting</title>
     <style>
+      @font-face {
+        font-family: 'DigimonWorld';
+        src: url('/digimon-world-text-font-psone.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+      }
       body {
-        font-family: sans-serif;
+        font-family: DigimonWorld, sans-serif;
         background-color: #293942;
         color: #D6D6D6;
+      }
+      .table-outer {
+        border: 2px solid #8CD6F7;
+        margin-right: 20px;
+        box-shadow: 3px 3px #6B849C;
+        border-radius: 6px;
       }
       table {
         font-size: 2em;
@@ -16,15 +28,24 @@
         background-color: #394A5A;
         color: #D6D6D6;
       }
+      thead th {
+        padding: 0;
+        border: 0;
+      }
+      .table-header {
+        border-bottom: 2px solid #8CD6F7;
+        padding: 0.22em 0.2em 0.14em;
+      }
       th {
+        font-weight: normal;
         text-align: left;
       }
       td {
         text-align: right;
       }
       td, th {
-        border: 0.2em solid #394A5A;
-        padding: 0.1em;
+        border: 0.1em solid #394A5A;
+        padding: 0.22em 0.2em 0.14em;
       }
       .flash-once {
         animation: flash 2s ease-out forwards;
@@ -57,10 +78,6 @@
       #evolution-paths {
         display: flex;
         flex-direction: row;
-      }
-
-      #evolution-paths table {
-        margin-right: 20px;
       }
     </style>
   </head>

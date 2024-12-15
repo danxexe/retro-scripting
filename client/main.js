@@ -37,9 +37,10 @@ const objectMap = (obj, fn) =>
 function format_value(value) {
   if (Array.isArray(value)) {
     let [min, max] = value;
-    min = min == Infinity ? "∞" : min;
-    max = max == Infinity ? "∞" : max;
-    return html`${min} <span style="font-size: 0.8em">≷</span> ${max}`;
+    let space = html`<span style="font-size: 0.5em"> </span>`
+    min = min == Infinity ? "" : min;
+    max = max == Infinity ? "" : max;
+    return html`${min}${space}..${space}${max}`;
   }
 
   return value;
@@ -55,21 +56,25 @@ function is_fulfilled(partner, requirement) {
 
 const digimon_template = (name, stats, props, classes = []) => {
   return html`
-  <table>
-    <thead>
-      <tr>
-        <th colspan="2">${() => name}</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${() => Object.entries(props).map(([key, display]) => html`
-        <tr class="${() => classes[key]}">
-          <th>${display}</th>
-          <td>${format_value(stats[key])}</td>
+  <div class="table-outer">
+    <table>
+      <thead>
+        <tr>
+          <th colspan="2">
+            <div class="table-header">${() => name}</div>
+          </th>
         </tr>
-      `)}
-    </tbody>
-  </table>`
+      </thead>
+      <tbody>
+        ${() => Object.entries(props).map(([key, display]) => html`
+          <tr class="${() => classes[key]}">
+            <th>${display}</th>
+            <td>${format_value(stats[key])}</td>
+          </tr>
+        `)}
+      </tbody>
+    </table>
+  </div>`
 }
 
 html`
