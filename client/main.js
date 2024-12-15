@@ -1,5 +1,5 @@
 import { JSONRPCClient } from './json-rpc-2.0.js'
-import { stats, digimonNames, evolutionPaths, evolutionRequirements } from './digimon-world.js'
+import { stats, digimonNames, evolutionPaths, evolutionRequirements, countTechs} from './digimon-world.js'
 import { reactive, html } from './arrow.js'
 
 const client = new JSONRPCClient((jsonRPCRequest) =>
@@ -20,16 +20,19 @@ const client = new JSONRPCClient((jsonRPCRequest) =>
   })
 );
 
-const stats_table = document.querySelector("#stats-table");
-const stats_row_template = document.querySelector("#stats-row-template");
-let old_data = {}
-
 let state = reactive({
   partner: {},
   evoPaths: [],
 });
 
 window.state = state;
+
+const objectMap = (obj, fn) =>
+  Object.fromEntries(
+    Object.entries(obj).map(
+      ([k, v], i) => [k, fn(k, v, i)]
+    )
+  )
 
 function format_value(value) {
   if (Array.isArray(value)) {
@@ -42,7 +45,15 @@ function format_value(value) {
   return value;
 }
 
-const digimon_template = (name, stats, props) => {
+function is_fulfilled(partner, requirement) {
+  // console.log(partner, requirement)
+  if (requirement == undefined) return "";
+  if (typeof requirement == "number" && partner >= requirement) return "fulfilled";
+  if (Array.isArray(requirement) && partner >= requirement[0] && partner < requirement[1]) return "fulfilled";
+  return "unfulfilled";
+}
+
+const digimon_template = (name, stats, props, classes = []) => {
   return html`
   <table>
     <thead>
@@ -52,7 +63,7 @@ const digimon_template = (name, stats, props) => {
     </thead>
     <tbody>
       ${() => Object.entries(props).map(([key, display]) => html`
-        <tr class="flash-once">
+        <tr class="${() => classes[key]}">
           <th>${display}</th>
           <td>${format_value(stats[key])}</td>
         </tr>
@@ -62,11 +73,20 @@ const digimon_template = (name, stats, props) => {
 }
 
 html`
-  ${() => digimon_template(state.partner.name, state.partner, stats)}
+  ${() => {
+    const classes = objectMap(stats, (k, _) => "flash-once")
+    return digimon_template(state.partner.name, state.partner, stats, classes);
+  }}
 `(document.querySelector("#partner"))
 
 html`
-  ${() => state.evoPaths.map(([name, requirements]) => digimon_template(name, requirements, stats))}
+  ${() => state.evoPaths.map(([name, requirements]) => {
+    const classes = objectMap(stats, (k, v) => {
+      const fulfilled = is_fulfilled(state.partner[k],  requirements[k]);
+      return fulfilled;
+    });
+    return digimon_template(name, requirements, stats, classes);
+  })}
 `(document.querySelector("#evolution-paths"))
 
 async function update() {
@@ -76,7 +96,15 @@ async function update() {
       discipline: 0x138488,
       mistakes: 0x13847e,
       weight: 0x1384a2,
-      battles: 0x1384b4
+      battles: 0x1384b4,
+      fire_techs: 0x155800,
+      air_techs: 0x155801,
+      aice_techs: 0x155802,
+      mech_techs: 0x155803,
+      earth_techs: 0x155804,
+      battle_techs: 0x155805,
+      filth_techs: 0x155806,
+      filth_techs_ext: 0x155807,
     },
     u16le: {
       digimon_id: 0x1557b0,
@@ -91,26 +119,25 @@ async function update() {
   
   state.partner = reactive({ ...response["u8"], ...response["u16le"] });
   state.partner.name = digimonNames.get(state.partner.digimon_id);
+  state.partner.techs = countTechs(state.partner);
 
   state.evoPaths = evolutionPaths[state.partner.name]
     .map((digimon) => [digimon, evolutionRequirements[digimon]])
     .filter(([_, req]) => req.special == undefined);
-
-  old_data = state.partner;
 }
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-let run = true;
+window.run = true;
 
 async function loop() {
-  while (run) {
+  while (window.run) {
     try {
       await update();
     } catch (e) {
-      run = false
+      window.run = false
       console.log(e)
     }
 

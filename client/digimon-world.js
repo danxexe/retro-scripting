@@ -5,10 +5,10 @@ export const stats = {
   def: "Defense",
   speed: "Speed",
   brains: "Brains",
-  happiness: "Happiness",
-  discipline: "Discipline",
   mistakes: "Mistakes",
   weight: "Weight",
+  happiness: "Happiness",
+  discipline: "Discipline",
   battles: "Battles",
   techs: "Techs",
 };
@@ -142,57 +142,77 @@ export const evolutionPaths = {
 };
 
 export const evolutionRequirements = {
-  "Agumon": { hp: 10, mp: 10, off: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Koromon' },
-  "Betamon": { hp: 10, mp: 10, def: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Tanemon' },
-  "Biyomon": { mp: 10, def: 1, speed: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Tokomon' },
-  "Elecmon": { hp: 10, off: 1, speed: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Tsunomon' },
-  "Gabumon": { def: 1, speed: 1, brains: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Koromon' },
+  "Agumon": { hp: 10, mp: 10, off: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Koromon' },
+  "Betamon": { hp: 10, mp: 10, def: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Tanemon' },
+  "Biyomon": { mp: 10, def: 1, speed: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Tokomon' },
+  "Elecmon": { hp: 10, off: 1, speed: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Tsunomon' },
+  "Gabumon": { def: 1, speed: 1, brains: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Koromon' },
   "Kunemon": { special: "50% chance after sleeping in Kunemon's Bed" },
-  "Palmon": { mp: 10, speed: 1, brains: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Tanemon' },
-  "Patamon": { hp: 10, off: 1, brains: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Tokomon' },
-  "Penguinmon": { mp: 10, def: 1, brains: 1, care: [0, Infinity], weight: 15, digimonBonus: 'Tsunomon' },
-  "Airdramon": { mp: 1000, speed: 100, brains: 100, care: [0, 1], weight: 30, discipline: 90, techs: 35 },
-  "Angemon": { mp: 1000, brains: 100, care: [0, 0], weight: 20, techs: 35, digimonBonus: 'Patamon' },
-  "Bakemon": { mp: 1000, care: [3, Infinity], weight: 20, happiness: 50, techs: 28 },
-  "Birdramon": { speed: 100, care: [3, Infinity], weight: 20, techs: 35, digimonBonus: 'Biyomon' },
-  "Centarumon": { brains: 100, care: [0, 0], weight: 30, discipline: 60, techs: 28 },
-  "Coelamon": { def: 100, care: [3, Infinity], weight: 30, battles: [5, Infinity], techs: 35 },
+  "Palmon": { mp: 10, speed: 1, brains: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Tanemon' },
+  "Patamon": { hp: 10, off: 1, brains: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Tokomon' },
+  "Penguinmon": { mp: 10, def: 1, brains: 1, care: [0, Infinity], weight: [10, 20], digimonBonus: 'Tsunomon' },
+  "Airdramon": { mp: 1000, speed: 100, brains: 100, care: [0, 1], weight: [25, 35], discipline: 90, techs: 35 },
+  "Angemon": { mp: 1000, brains: 100, care: [0, 0], weight: [15, 25], techs: 35, digimonBonus: 'Patamon' },
+  "Bakemon": { mp: 1000, care: [3, Infinity], weight: [15, 25], happiness: 50, techs: 28 },
+  "Birdramon": { speed: 100, care: [3, Infinity], weight: [15, 25], techs: 35, digimonBonus: 'Biyomon' },
+  "Centarumon": { brains: 100, care: [0, 0], weight: [25, 35], discipline: 60, techs: 28 },
+  "Coelamon": { def: 100, care: [3, Infinity], weight: [25, 35], battles: [5, Infinity], techs: 35 },
   "Devimon": { special: "50% chance after losing a battle with Angemon with discipline < 50%" },
-  "Drimogemon": { off: 100, care: [3, Infinity], weight: 40, happiness: 50, techs: 28 },
-  "Frigimon": { mp: 1000, brains: 100, care: [0, 5], weight: 30, happiness: 50, techs: 28 },
-  "Garurumon": { mp: 1000, speed: 100, care: [0, 1], weight: 30, discipline: 90, techs: 28 },
-  "Greymon": { off: 100, def: 100, speed: 100, brains: 100, care: [0, 1], weight: 30, discipline: 90, techs: 35 },
-  "Kabuterimon": { hp: 1000, mp: 1000, off: 100, speed: 100, care: [0, 1], weight: 30, techs: 35, digimonBonus: 'Kunemon' },
-  "Kokatorimon": { hp: 1000, care: 3, weight: 30, techs: 28, digimonBonus: 'Biyomon' },
-  "Kuwagamon": { hp: 1000, mp: 1000, off: 100, speed: 100, care: 5, weight: 30, techs: 28, digimonBonus: 'Kunemon' },
-  "Leomon": { off: 100, speed: 100, brains: 100, care: [0, 1], weight: 20, battles: [10, Infinity], techs: 35 },
-  "Meramon": { off: 100, care: [5, Infinity], weight: 20, battles: [10, Infinity], techs: 28 },
-  "Mojyamon": { hp: 1000, care: [5, Infinity], weight: 20, battles: [0, 5], techs: 28 },
-  "Monochromon": { hp: 1000, def: 100, brains: 100, care: [0, 3], weight: 40, battles: [0, 5], techs: 35 },
+  "Drimogemon": { off: 100, care: [3, Infinity], weight: [35, 45], happiness: 50, techs: 28 },
+  "Frigimon": { mp: 1000, brains: 100, care: [0, 5], weight: [25, 35], happiness: 50, techs: 28 },
+  "Garurumon": { mp: 1000, speed: 100, care: [0, 1], weight: [25, 35], discipline: 90, techs: 28 },
+  "Greymon": { off: 100, def: 100, speed: 100, brains: 100, care: [0, 1], weight: [25, 35], discipline: 90, techs: 35 },
+  "Kabuterimon": { hp: 1000, mp: 1000, off: 100, speed: 100, care: [0, 1], weight: [25, 35], techs: 35, digimonBonus: 'Kunemon' },
+  "Kokatorimon": { hp: 1000, care: 3, weight: [25, 35], techs: 28, digimonBonus: 'Biyomon' },
+  "Kuwagamon": { hp: 1000, mp: 1000, off: 100, speed: 100, care: 5, weight: [25, 35], techs: 28, digimonBonus: 'Kunemon' },
+  "Leomon": { off: 100, speed: 100, brains: 100, care: [0, 1], weight: [15, 25], battles: [10, Infinity], techs: 35 },
+  "Meramon": { off: 100, care: [5, Infinity], weight: [15, 25], battles: [10, Infinity], techs: 28 },
+  "Mojyamon": { hp: 1000, care: [5, Infinity], weight: [15, 25], battles: [0, 5], techs: 28 },
+  "Monochromon": { hp: 1000, def: 100, brains: 100, care: [0, 3], weight: [35, 45], battles: [0, 5], techs: 35 },
   "Nanimon": { special: "Scold when happiness and discipline are both 0" },
-  "Ninjamon": { mp: 1000, off: 100, speed: 100, care: [0, 1], weight: 10, battles: [15, Infinity], techs: 35 },
+  "Ninjamon": { mp: 1000, off: 100, speed: 100, care: [0, 1], weight: [5, 15], battles: [15, Infinity], techs: 35 },
   "Numemon": { special: "After 96h when requirements for other evolutions are not met" },
-  "Ogremon": { hp: 1000, off: 100, care: [5, Infinity], weight: 30, battles: [15, Infinity], techs: 35 },
-  "Seadramon": { hp: 1000, mp: 1000, care: [3, Infinity], weight: 30, battles: [0, 5], techs: 28 },
-  "Shellmon": { hp: 1000, def: 100, care: 5, weight: 40, techs: 35, digimonBonus: 'Betamon' },
+  "Ogremon": { hp: 1000, off: 100, care: [5, Infinity], weight: [25, 35], battles: [15, Infinity], techs: 35 },
+  "Seadramon": { hp: 1000, mp: 1000, care: [3, Infinity], weight: [25, 35], battles: [0, 5], techs: 28 },
+  "Shellmon": { hp: 1000, def: 100, care: 5, weight: [35, 45], techs: 35, digimonBonus: 'Betamon' },
   "Sukamon": { special: "Fill virus bar" },
-  "Tyrannomon": { hp: 1000, def: 100, care: [0, 5], weight: 30, battles: [0, 5], techs: 28 },
-  "Unimon": { hp: 1000, speed: 100, care: [0, 3], weight: 30, battles: [10, Infinity], techs: 35 },
-  "Vegiemon": { mp: 1000, care: [5, Infinity], weight: 10, happiness: 50, techs: 21 },
-  "Whamon": { hp: 1000, brains: 100, care: [0, 5], weight: 40, discipline: 60, techs: 28 },
-  "Andromon": { hp: 2000, mp: 4000, off: 200, def: 400, speed: 200, brains: 400, care: [0, 5], weight: 40, discipline: 95, battles: [30, Infinity], techs: 30 },
-  "Digitamamon": { hp: 3000, mp: 3000, off: 400, def: 400, speed: 400, brains: 300, care: [0, 0], weight: 10, battles: [100, Infinity], techs: 49 },
-  "Etemon": { hp: 2000, mp: 3000, off: 400, def: 200, speed: 400, brains: 300, care: [0, 0], weight: 15, battles: [50, Infinity], techs: 49 },
-  "Giromon": { off: 400, speed: 300, brains: 400, care: [15, Infinity], weight: 5, happiness: 95, battles: [100, Infinity], techs: 35 },
-  "H-Kabuterimon": { hp: 7000, def: 400, speed: 600, brains: 400, care: [0, 55], weight: 5, battles: [0, 0], techs: 40 },
-  "Mamemon": { off: 400, def: 300, speed: 300, brains: 400, care: [15, Infinity], weight: 5, happiness: 90, techs: 25 },
-  "Megadramon": { hp: 3000, mp: 5000, off: 500, def: 300, speed: 400, brains: 400, care: [0, 10], weight: 55, battles: [30, Infinity], techs: 30 },
-  "MegaSeadramon": { mp: 4000, off: 500, def: 400, brains: 400, care: [0, 5], weight: 30, battles: [0, 0], techs: 40 },
-  "MetalGreymon": { hp: 4000, mp: 3000, off: 500, def: 500, speed: 300, brains: 300, care: [0, 10], weight: 65, discipline: 95, battles: [30, Infinity], techs: 30 },
-  "MetalMamemon": { off: 500, def: 400, speed: 400, brains: 400, care: [0, 15], weight: 10, happiness: 95, techs: 30 },
-  "Monzaemon": { hp: 3000, mp: 3000, off: 300, def: 300, speed: 300, brains: 300, care: [0, Infinity], weight: 40, battles: [50, Infinity], techs: 49 },
-  "Phoenixmon": { hp: 4000, mp: 4000, speed: 400, brains: 600, care: [0, 3], weight: 30, discipline: 100, battles: [0, 0], techs: 40 },
-  "Piximon": { off: 300, def: 300, speed: 400, brains: 400, care: [15, Infinity], weight: 5, happiness: 95, techs: 25 },
-  "SkullGreymon": { hp: 4000, mp: 6000, off: 400, def: 400, speed: 200, brains: 500, care: [10, Infinity], weight: 30, battles: [40, Infinity], techs: 45 },
+  "Tyrannomon": { hp: 1000, def: 100, care: [0, 5], weight: [25, 35], battles: [0, 5], techs: 28 },
+  "Unimon": { hp: 1000, speed: 100, care: [0, 3], weight: [25, 35], battles: [10, Infinity], techs: 35 },
+  "Vegiemon": { mp: 1000, care: [5, Infinity], weight: [5, 15], happiness: 50, techs: 21 },
+  "Whamon": { hp: 1000, brains: 100, care: [0, 5], weight: [35, 45], discipline: 60, techs: 28 },
+  "Andromon": { hp: 2000, mp: 4000, off: 200, def: 400, speed: 200, brains: 400, care: [0, 5], weight: [35, 45], discipline: 95, battles: [30, Infinity], techs: 30 },
+  "Digitamamon": { hp: 3000, mp: 3000, off: 400, def: 400, speed: 400, brains: 300, care: [0, 0], weight: [5, 15], battles: [100, Infinity], techs: 49 },
+  "Etemon": { hp: 2000, mp: 3000, off: 400, def: 200, speed: 400, brains: 300, care: [0, 0], weight: [10, 20], battles: [50, Infinity], techs: 49 },
+  "Giromon": { off: 400, speed: 300, brains: 400, care: [15, Infinity], weight: [0, 10], happiness: 95, battles: [100, Infinity], techs: 35 },
+  "H-Kabuterimon": { hp: 7000, def: 400, speed: 600, brains: 400, care: [0, 55], weight: [0, 10], battles: [0, 0], techs: 40 },
+  "Mamemon": { off: 400, def: 300, speed: 300, brains: 400, care: [15, Infinity], weight: [0, 10], happiness: 90, techs: 25 },
+  "Megadramon": { hp: 3000, mp: 5000, off: 500, def: 300, speed: 400, brains: 400, care: [50, 60], weight: [0, 10], battles: [30, Infinity], techs: 30 },
+  "MegaSeadramon": { mp: 4000, off: 500, def: 400, brains: 400, care: [0, 5], weight: [25, 35], battles: [0, 0], techs: 40 },
+  "MetalGreymon": { hp: 4000, mp: 3000, off: 500, def: 500, speed: 300, brains: 300, care: [0, 10], weight: [60, 70], discipline: 95, battles: [30, Infinity], techs: 30 },
+  "MetalMamemon": { off: 500, def: 400, speed: 400, brains: 400, care: [0, 15], weight: [5, 15], happiness: 95, techs: 30 },
+  "Monzaemon": { hp: 3000, mp: 3000, off: 300, def: 300, speed: 300, brains: 300, care: [0, Infinity], weight: [35, 45], battles: [50, Infinity], techs: 49 },
+  "Phoenixmon": { hp: 4000, mp: 4000, speed: 400, brains: 600, care: [0, 3], weight: [25, 35], discipline: 100, battles: [0, 0], techs: 40 },
+  "Piximon": { off: 300, def: 300, speed: 400, brains: 400, care: [15, Infinity], weight: [0, 10], happiness: 95, techs: 25 },
+  "SkullGreymon": { hp: 4000, mp: 6000, off: 400, def: 400, speed: 200, brains: 500, care: [10, Infinity], weight: [25, 35], battles: [40, Infinity], techs: 45 },
   "Vademon": { special: "After 240h when praising or scolding" },
+}
+
+export function countTechs(techs) {
+  return countSetBits(techs.fire_techs) + 
+  countSetBits(techs.air_techs) + 
+  countSetBits(techs.aice_techs) + 
+  countSetBits(techs.mech_techs) + 
+  countSetBits(techs.earth_techs) + 
+  countSetBits(techs.battle_techs) + 
+  countSetBits(techs.filth_techs) +
+  countSetBits(techs.filth_techs_ext & 0xF);
+}
+
+function countSetBits(num) {
+  let count = 0;
+  while (num) {
+    count += num & 1;
+    num >>= 1;
+  }
+  return count;
 }
