@@ -48,15 +48,24 @@ function format_value(value) {
   return value;
 }
 
-function is_fulfilled(partner, requirement) {
-  if (requirement == undefined) return "not-requirement";
-  if (typeof requirement == "number" && partner >= requirement) return "fulfilled";
-  if (Array.isArray(requirement) && partner >= requirement[0] && partner < requirement[1]) return "fulfilled";
-  if (typeof requirement == "string" && partner == requirement) return "fulfilled";
-  return "unfulfilled";
+function check_requirement(partner, requirement) {
+  if (requirement == undefined) return undefined;
+  if (typeof requirement == "number" && partner >= requirement) return true;
+  if (Array.isArray(requirement) && partner >= requirement[0] && partner < requirement[1]) return true;
+  if (typeof requirement == "string" && partner == requirement) return true;
+  return false;
 }
 
-const digimon_template = (name, stats, props, classes = []) => {
+function requirements_met(f) {
+  const stats = (f.hp ?? true) && (f.mp ?? true) && (f.off ?? true) && (f.def ?? true) && (f.speed ?? true) && (f.brains ?? true);
+  const mistakes = f.mistakes ?? false;
+  const weight = f.weight ?? false;
+  const bonus = (f.happiness ?? false) || (f.discipline ?? false) || (f.battles ?? false) || (f.techs ?? false) || (f.partner ?? false);
+
+  return [stats, mistakes, weight, bonus].filter(met => met).length;
+}
+
+const digimon_template = (name, values, stats, compute_classes) => {
   return html`
   <div class="table-outer">
     <table>
@@ -67,32 +76,58 @@ const digimon_template = (name, stats, props, classes = []) => {
           </th>
         </tr>
       </thead>
-      <tbody>
-        ${() => Object.entries(props).map(([key, display]) => html`
-          <tr class="${() => classes[key]}">
-            <th>${display}</th>
-            <td>${format_value(stats[key])}</td>
-          </tr>
-        `)}
-      </tbody>
+      ${() => stats.map(group => stat_group_template(group, values, compute_classes))}
     </table>
   </div>`
 }
 
+const stat_group_template = (group, values, compute_classes) => {
+  const keys = Object.keys(group);
+  const classes = objectMap(group, key => compute_classes(key));
+  const requirement_classes = keys.flatMap(key => classes[key].filter(klass => {
+    if (klass.startsWith("stat-")) return false;
+    if (klass == "not-requirement") return false;
+
+    return true;
+  }));
+  const fulfilled = requirement_classes.filter(klass => klass == "fulfilled")
+
+  let is_fulfilled = (keys.length == 6) ? requirement_classes.length == fulfilled.length : fulfilled.length > 0;
+  let klass = is_fulfilled ? "fulfilled" : "";
+
+  return html`
+  <tbody class="${klass}">
+    ${() => keys.map(key => stat_row_template(group[key], values[key], classes[key]))}
+  </tbody>
+  `
+}
+
+const stat_row_template = (label, value, classes) => {
+  return html`
+  <tr class="${() => classes.join(" ")}">
+    <th>${label}</th>
+    <td>${format_value(value)}</td>
+  </tr>`
+}
+
 html`
   ${() => {
-    const classes = objectMap(stats, (k, _) => [`stat-${k}`, "flash-once"].join(" "))
-    return digimon_template(state.partner.name, state.partner, stats, classes);
+    const compute_classes = (k) => [`stat-${k}`, "flash-once"];
+    return digimon_template(state.partner.name, state.partner, stats, compute_classes);
   }}
 `(document.querySelector("#partner"))
 
 html`
-  ${() => state.evoPaths.map(([name, requirements]) => {
-    const classes = objectMap(stats, (k, v) => {
-      const fulfilled = is_fulfilled(state.partner[k],  requirements[k]);
-      return [`stat-${k}`, fulfilled].join(" ");
-    });
-    return digimon_template(name, requirements, stats, classes);
+  ${() => state.evoPaths.map((path) => {
+    const compute_classes = (k) => {
+      const fullfilled = path.fulfilments[k];
+      const klass = fullfilled == undefined ? "not-requirement" : fullfilled ? "fulfilled" : "unfulfilled";
+      return [`stat-${k}`, klass];
+    };
+    const met = requirements_met(path.fulfilments)
+    const ready = met >= 3 ? "ready" : "";
+    const name = html`<div class="${ready}">${path.name}</div>`;
+    return digimon_template(name, path.requirements, stats, compute_classes);
   })}
 `(document.querySelector("#evolution-paths"))
 
@@ -132,8 +167,13 @@ async function update() {
 
   state.evoPaths = evolutionPaths[state.partner.name]
   // state.evoPaths = evolutionPaths["Biyomon"]
-    .map((digimon) => [digimon, evolutionRequirements[digimon]])
-    .filter(([_, req]) => req.special == undefined);
+    .map((digimon) => {
+      const requirements = evolutionRequirements[digimon];
+      const fulfilments = objectMap(requirements, (key, value) => check_requirement(state.partner[key], value))
+
+      return {name: digimon, requirements, fulfilments}
+    })
+    .filter((path) => path.requirements.special == undefined);
 }
 
 function sleep(ms) {

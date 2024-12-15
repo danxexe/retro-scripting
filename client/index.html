@@ -48,6 +48,7 @@
       }
       tr {
         border: 0.1em solid #394A5A;
+        border-width: 0.1em 0;
       }
       td, th {
         padding: 0.2em 0.2em 0.16em;
@@ -55,8 +56,11 @@
       .flash-once {
         animation: flash 2s ease-out forwards;
       }
-      .fulfilled {
+      tbody .fulfilled {
         background-color: #4A39DE;
+      }
+      tbody.fulfilled tr:not(.fulfilled) {
+        opacity: 30%;
       }
       .not-requirement {
         opacity: 30%;
@@ -70,6 +74,9 @@
       }
       tr.stat-partner {
         border-bottom: none;
+      }
+      th:has(.ready) {
+        background-color: #A57300;
       }
 
       @keyframes flash {
