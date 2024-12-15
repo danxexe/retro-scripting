@@ -211,7 +211,7 @@ export const evolutionRequirements = {
 export function countTechs(techs) {
   return countSetBits(techs.fire_techs) + 
   countSetBits(techs.air_techs) + 
-  countSetBits(techs.aice_techs) + 
+  countSetBits(techs.ice_techs) + 
   countSetBits(techs.mech_techs) + 
   countSetBits(techs.earth_techs) + 
   countSetBits(techs.battle_techs) + 

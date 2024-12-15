@@ -120,11 +120,11 @@ html`
 html`
   ${() => state.evoPaths.map((path) => {
     const compute_classes = (k) => {
-      const fullfilled = path.fulfilments[k];
-      const klass = fullfilled == undefined ? "not-requirement" : fullfilled ? "fulfilled" : "unfulfilled";
+      const fulfilled = path.fulfillments[k];
+      const klass = fulfilled == undefined ? "not-requirement" : fulfilled ? "fulfilled" : "unfulfilled";
       return [`stat-${k}`, klass];
     };
-    const met = requirements_met(path.fulfilments)
+    const met = requirements_met(path.fulfillments)
     const ready = met >= 3 ? "ready" : "";
     const name = html`<div class="${ready}">${path.name}</div>`;
     return digimon_template(name, path.requirements, stats, compute_classes);
@@ -141,7 +141,7 @@ async function update() {
       battles: 0x1384b4,
       fire_techs: 0x155800,
       air_techs: 0x155801,
-      aice_techs: 0x155802,
+      ice_techs: 0x155802,
       mech_techs: 0x155803,
       earth_techs: 0x155804,
       battle_techs: 0x155805,
@@ -169,9 +169,9 @@ async function update() {
   // state.evoPaths = evolutionPaths["Biyomon"]
     .map((digimon) => {
       const requirements = evolutionRequirements[digimon];
-      const fulfilments = objectMap(requirements, (key, value) => check_requirement(state.partner[key], value))
+      const fulfillments = objectMap(requirements, (key, value) => check_requirement(state.partner[key], value))
 
-      return {name: digimon, requirements, fulfilments}
+      return {name: digimon, requirements, fulfillments}
     })
     .filter((path) => path.requirements.special == undefined);
 }
