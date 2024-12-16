@@ -22,19 +22,24 @@ Think [RetroAchievements](https://retroachievements.org/) or custom [trackers](h
 This project implements a `retro_scripting_libretro` core that acts as a proxy to another Libretro core.
 All emulation functionality is handled by the proxied core.
 The proxy core starts a [jsonrpc](https://en.wikipedia.org/wiki/JSON-RPC) server listening on http://localhost:3030.
-Any app running on the same machine can then send requests to the jsonrpc server asking for the core to execute some method,
-like reading some value from the game's memory for example.
+Any app running on the same machine can then send requests to the jsonrpc server asking for `retro_scripting` to execute a command,
+like for example, reading some value from the game's memory.
 
-To load some content, you need to pass to retroarch
+When loading `retro_scripting` as a core, you need to set the `RETRO_SCRIPTING_CORE_PATH` environment variable,
+otherwise `retro_scripting` won't know what core to proxy to.
+Since `retro_scripting` needs to load the proxied core file,
+passing the core's short name to RetroArch with `-L` won't work, you need to pass the full path.
 
-- the path to retro_scripting_libretro
-- the path to the real core that will be proxied to
-- the path to the game content file
-
-like in the following example:
+On Linux / Mac:
 
 ```
-retroarch -L path/to/retro_scripting_libretro path/to/real_core_libretro?content=path/to/content_file'
+LIBRETRO_CORE_PATH=path/to/real_core_libretro.so retroarch -L path/to/retro_scripting_libretro.so path/to/content_file.ext
+```
+
+On Windows:
+
+```
+set LIBRETRO_CORE_PATH=path/to/real_core_libretro.so && retroarch -L path/to/retro_scripting_libretro.so path/to/content_file.ext
 ```
 
 ## What?

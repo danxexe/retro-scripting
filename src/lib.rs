@@ -1,20 +1,21 @@
-use std::collections::HashMap;
-use std::sync::{LazyLock, RwLock};
+use std::env;
+use std::sync::LazyLock;
 use std::thread;
-use std::ffi::{CString, CStr};
 use libloading::{Library, Symbol};
-use libretro_rs::sys::{
-    retro_environment_t,
-    retro_system_info,
-    retro_game_info,
-};
+use libretro_rs::sys::retro_game_info;
 
 mod rpc_server;
 
-const LIBRARY_NAME: &core::ffi::CStr = c"RetroScripting";
-const LIBRARY_VERSION: &core::ffi::CStr = c"0.1";
+static STATE: LazyLock<ProxyState> = LazyLock::new(|| {
+    let core_path = env::var("RETRO_SCRIPTING_CORE_PATH")
+        .expect("[RetroScripting] Core path not specified. Please set the RETRO_SCRIPTING_CORE_PATH env var before running.");
 
-static PROXY_STATE: RwLock<ProxyState> = RwLock::new(ProxyState::default());
+    let lib = unsafe {
+        Library::new(&core_path).unwrap_or_else(|_| {panic!("[RetroScripting] Failed to load core from path: {}", core_path) })
+    };
+
+    ProxyState {core: Some(Core::new(lib))}
+});
 
 struct Core {
     pub lib: Library,
@@ -26,18 +27,6 @@ impl Core {
     }
 
     // Libretro functions
-
-    fn retro_set_environment(&self, cb: retro_environment_t) {
-        let func: Symbol<unsafe extern "C" fn(retro_environment_t)> =
-        unsafe { self.lib.get(b"retro_set_environment\0").unwrap() };
-        unsafe { func(cb) }
-    }
-
-    fn retro_init(&self) {
-        let func: Symbol<unsafe extern "C" fn()> =
-        unsafe { self.lib.get(b"retro_init\0").unwrap() };
-        unsafe { func() }
-    }
 
     fn retro_load_game(&self, game_info: *const retro_game_info) -> bool {
         let func: Symbol<unsafe extern "C" fn(*const retro_game_info) -> bool> =
@@ -70,7 +59,6 @@ impl Core {
 
 struct ProxyState {
     core: Option<Core>,
-    environment_callback: Option<retro_environment_t>,
 }
 
 impl ProxyState {
@@ -80,7 +68,6 @@ impl ProxyState {
     pub const fn default() -> Self {
         ProxyState {
             core: None,
-            environment_callback: None,
         }
     }
 }
@@ -100,107 +87,19 @@ static SERVER: LazyLock<()> = LazyLock::new(|| {
 });
 
 #[no_mangle]
-pub extern "C" fn retro_api_version() -> ::std::os::raw::c_uint {
-    1
-}
-
-#[no_mangle]
-pub extern "C" fn retro_set_environment(cb: retro_environment_t) {
-    let mut state = PROXY_STATE.write().unwrap();
-
-    if let Some(core) = &state.core {
-        let cb = state.environment_callback.unwrap();
-        core.retro_set_environment(cb);
-    } else {
-        state.environment_callback = Some(cb);
-        println!("[RetroScripting] Proxy core retro_set_environment called, environment_callback stored");
-    }
-}
-
-#[no_mangle]
-pub extern "C" fn retro_init() {
-    println!("[RetroScripting] Proxy core retro_init called");
-}
-
-#[no_mangle]
-pub extern "C" fn retro_get_system_info(info: *mut retro_system_info) {
-    let state = PROXY_STATE.read().unwrap();
-
-    if let Some(real_core) = &state.core {
-        let func: Symbol<unsafe extern "C" fn(*mut retro_system_info)> =
-            unsafe { real_core.lib.get(b"retro_get_system_info\0").unwrap() };
-        unsafe { func(info) };
-    } else {
-        let dummy_info = retro_system_info {
-            library_name: LIBRARY_NAME.as_ptr(),
-            library_version: LIBRARY_VERSION.as_ptr(),
-            valid_extensions: std::ptr::null(),
-            need_fullpath: true,
-            block_extract: true,
-        };
-        unsafe { *info = dummy_info };
-    }
-}
-
-#[no_mangle]
 pub extern "C" fn retro_load_game(game_info: *const retro_game_info) -> bool {
-    println!("[RetroScripting] Proxy core retro_load_game called. Parsing core path...");
+    let state = &*STATE;
+    let loaded = state.core().retro_load_game(game_info);
 
-    let info = unsafe { &*game_info };
-    let rom_path = unsafe { CStr::from_ptr(info.path).to_str().unwrap() };
-
-    let (core_path, file_path) = parse_rom_path(rom_path);
-
-    if let Some(file_path) = file_path {
-        let mut state = PROXY_STATE.write().unwrap();
-
-        let lib = unsafe {
-            Library::new(&core_path).expect("[RetroScripting] Failed to load real core")
-        };
-        let core = Core::new(lib);
-        state.core = Some(core);
-
-        println!("[RetroScripting] Loaded real core: {}", &core_path);
-
-        let clean_path = CString::new(file_path).unwrap();
-        let mut real_info = *info;
-        real_info.path = clean_path.as_ptr();
-
-        let core = state.core.as_ref().unwrap();
-        let environment_callback = state.environment_callback.unwrap();
-
-        core.retro_set_environment(environment_callback);
-        core.retro_init();
-        let loaded = core.retro_load_game(&real_info);
-
-        if loaded {
-            let _ = &*SERVER;
-        }
-
-        loaded
-    } else {
-        eprintln!("[RetroScripting] No content specified in argument");
-        return false;
-    }
-}
-
-fn parse_rom_path(rom_path: &str) -> (String, Option<String>) {
-    let mut parts = rom_path.splitn(2, '?');
-    let core_path = parts.next().unwrap_or_default().to_string();
-    let query = parts.next().unwrap_or("");
-
-    let mut args = HashMap::new();
-    for pair in query.split('&') {
-        if let Some((key, value)) = pair.split_once('=') {
-            args.insert(key.to_string(), value.to_string());
-        }
+    if loaded {
+        let _ = &*SERVER;
     }
 
-    (core_path, args.get("content").map(|s| s.to_string()))
+    loaded
 }
 
 fn core_get_memory_data(address: usize) -> u8 {
-    let state = PROXY_STATE.read().unwrap();
+    let state = &*STATE;
     state.core().memory()[address]
 }
 
@@ -208,10 +107,9 @@ macro_rules! forward_fn {
     ($name:ident, $ret:ty, $($arg:ident: $type:ty),*) => {
         #[no_mangle]
         pub extern "C" fn $name($($arg: $type),*) -> $ret {
+            let state = &*STATE;
             unsafe {
-                let state = PROXY_STATE.read().unwrap();
-                let core = &state.core.as_ref().unwrap();
-                let lib = &core.lib;
+                let lib = &state.core().lib;
                 let func: Symbol<unsafe extern "C" fn($($type),*) -> $ret> = lib
                     .get(concat!(stringify!($name), "\0").as_bytes())
                     .expect("Failed to find function in wrapped core");
@@ -221,25 +119,11 @@ macro_rules! forward_fn {
     };
 }
 
-// #[no_mangle]
-// pub extern "C" fn retro_serialize_size() -> usize {
-//     unsafe {
-//         let core = &WRAPPED_CORE;
-//         let func: Symbol<unsafe extern "C" fn() -> usize> = core
-//             .get(b"retro_serialize_size\0")
-//             .expect("Failed to find retro_init in wrapped core");
-//         let result = func();
-
-//         println!("retro_serialize_size called: {}", result);
-
-//         result
-//     }
-// }
-
-// forward_fn!(retro_api_version, (), );
-// forward_fn!(retro_init, (), );
+forward_fn!(retro_api_version, (), );
+forward_fn!(retro_set_environment, (), cb: extern "C" fn(*const std::ffi::c_void));
+forward_fn!(retro_init, (), );
 forward_fn!(retro_deinit, (), );
-// forward_fn!(retro_get_system_info, (), info: *mut std::ffi::c_void);
+forward_fn!(retro_get_system_info, (), info: *mut std::ffi::c_void);
 forward_fn!(retro_get_system_av_info, (), info: *mut std::ffi::c_void);
 forward_fn!(retro_set_video_refresh, (), cb: extern "C" fn(*const std::ffi::c_void, u32, u32, usize));
 forward_fn!(retro_set_audio_sample, (), cb: extern "C" fn(i16, i16));
@@ -264,7 +148,6 @@ forward_fn!(retro_serialize_size, usize, );
 forward_fn!(retro_serialize, bool, data: *mut std::ffi::c_void, size: usize);
 forward_fn!(retro_unserialize, bool, data: *const std::ffi::c_void, size: usize);
 forward_fn!(retro_run, (), );
-// forward_fn!(retro_set_environment, (), cb: extern "C" fn(*const std::ffi::c_void));
 forward_fn!(retro_set_controller_info, (), info: *mut std::ffi::c_void);
 forward_fn!(retro_get_input_device_capabilities, u32, port: u32);
 forward_fn!(retro_get_input_devices, u32, );
