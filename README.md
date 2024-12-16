@@ -17,6 +17,18 @@ All emulation functionality is handled by the proxied core.
 The proxy core starts a [jsonrpc](https://en.wikipedia.org/wiki/JSON-RPC) server listening on http://localhost:3030.
 Any app running on the same machine can then send requests to the jsonrpc server asking for the core to execute some method.
 
+To load some content, you need to pass to retroarch
+
+- the path to retro_scripting_libretro
+- the path to the real core that will be proxied to
+- the path to the game content file
+
+like in the following example:
+
+```
+retroarch -L path/to/retro_scripting_libretro path/to/real_core_libretro?content=path/to/content_file'
+```
+
 ## What?
 
 Current features are very limited, but sufficient to implement a full game tracker. You can read either
@@ -45,7 +57,6 @@ curl -X POST -H "Content-type: application/json" -d '{
 
 ## TODO
 
-- Allow changing the proxied core path (currently hardcoded).
 - Add proper logging to the jsonrpc server.
 - Implement memory reading for other data types. (C strings?, Entire structs?)
 - Implement memory writing?
