@@ -501,7 +501,6 @@ name = "retro_scripting"
 version = "0.1.0"
 dependencies = [
  "jsonrpc-http-server",
- "lazy_static",
  "libloading",
  "libretro-rs",
  "serde_json",

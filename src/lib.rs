@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::LazyLock;
+use std::sync::{LazyLock, RwLock};
 use std::thread;
 use std::ffi::{CString, CStr};
 use libloading::{Library, Symbol};
@@ -11,15 +11,10 @@ use libretro_rs::sys::{
 
 mod rpc_server;
 
-use std::sync::Mutex;
-use lazy_static::lazy_static;
-
 const LIBRARY_NAME: &core::ffi::CStr = c"RetroScripting";
 const LIBRARY_VERSION: &core::ffi::CStr = c"0.1";
 
-lazy_static! {
-    static ref PROXY_STATE: Mutex<ProxyState> = Mutex::new(ProxyState::default());
-}
+static PROXY_STATE: RwLock<ProxyState> = RwLock::new(ProxyState::default());
 
 struct Core {
     pub lib: Library,
@@ -82,14 +77,17 @@ impl ProxyState {
     pub fn core(&self) -> &Core {
         self.core.as_ref().unwrap()
     }
-}
-
-impl Default for ProxyState {
-    fn default() -> Self {
+    pub const fn default() -> Self {
         ProxyState {
             core: None,
             environment_callback: None,
         }
+    }
+}
+
+impl Default for ProxyState {
+    fn default() -> Self {
+        ProxyState::default()
     }
 }
 
@@ -102,8 +100,13 @@ static SERVER: LazyLock<()> = LazyLock::new(|| {
 });
 
 #[no_mangle]
+pub extern "C" fn retro_api_version() -> ::std::os::raw::c_uint {
+    1
+}
+
+#[no_mangle]
 pub extern "C" fn retro_set_environment(cb: retro_environment_t) {
-    let mut state = PROXY_STATE.lock().unwrap();
+    let mut state = PROXY_STATE.write().unwrap();
 
     if let Some(core) = &state.core {
         let cb = state.environment_callback.unwrap();
@@ -121,7 +124,7 @@ pub extern "C" fn retro_init() {
 
 #[no_mangle]
 pub extern "C" fn retro_get_system_info(info: *mut retro_system_info) {
-    let state = PROXY_STATE.lock().unwrap();
+    let state = PROXY_STATE.read().unwrap();
 
     if let Some(real_core) = &state.core {
         let func: Symbol<unsafe extern "C" fn(*mut retro_system_info)> =
@@ -149,7 +152,7 @@ pub extern "C" fn retro_load_game(game_info: *const retro_game_info) -> bool {
     let (core_path, file_path) = parse_rom_path(rom_path);
 
     if let Some(file_path) = file_path {
-        let mut state = PROXY_STATE.lock().unwrap();
+        let mut state = PROXY_STATE.write().unwrap();
 
         let lib = unsafe {
             Library::new(&core_path).expect("[RetroScripting] Failed to load real core")
@@ -197,7 +200,7 @@ fn parse_rom_path(rom_path: &str) -> (String, Option<String>) {
 }
 
 fn core_get_memory_data(address: usize) -> u8 {
-    let state = PROXY_STATE.lock().unwrap();
+    let state = PROXY_STATE.read().unwrap();
     state.core().memory()[address]
 }
 
@@ -206,7 +209,7 @@ macro_rules! forward_fn {
         #[no_mangle]
         pub extern "C" fn $name($($arg: $type),*) -> $ret {
             unsafe {
-                let state = PROXY_STATE.lock().unwrap();
+                let state = PROXY_STATE.read().unwrap();
                 let core = &state.core.as_ref().unwrap();
                 let lib = &core.lib;
                 let func: Symbol<unsafe extern "C" fn($($type),*) -> $ret> = lib
@@ -233,7 +236,7 @@ macro_rules! forward_fn {
 //     }
 // }
 
-forward_fn!(retro_api_version, (), );
+// forward_fn!(retro_api_version, (), );
 // forward_fn!(retro_init, (), );
 forward_fn!(retro_deinit, (), );
 // forward_fn!(retro_get_system_info, (), info: *mut std::ffi::c_void);
