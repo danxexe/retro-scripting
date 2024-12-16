@@ -30,6 +30,8 @@ impl Core {
         Core { lib }
     }
 
+    // Libretro functions
+
     fn retro_set_environment(&self, cb: retro_environment_t) {
         let func: Symbol<unsafe extern "C" fn(retro_environment_t)> =
         unsafe { self.lib.get(b"retro_set_environment\0").unwrap() };
@@ -47,11 +49,39 @@ impl Core {
         unsafe { self.lib.get(b"retro_load_game\0").unwrap() };
         unsafe { func(game_info) }
     }
+
+    fn retro_get_memory_size(&self, id: usize) -> usize {
+        let func: Symbol<unsafe extern "C" fn(::std::os::raw::c_uint) -> usize> =
+        unsafe { self.lib.get(b"retro_get_memory_size\0").unwrap() };
+        unsafe { func(id.try_into().unwrap()) }
+    }
+
+    fn retro_get_memory_data(&self, id: usize) -> *mut std::ffi::c_void {
+        let func: Symbol<unsafe extern "C" fn(::std::os::raw::c_uint) -> *mut ::std::os::raw::c_void> =
+        unsafe { self.lib.get(b"retro_get_memory_data\0").unwrap() };
+        unsafe { func(id.try_into().unwrap()) }
+    }
+
+    // Custom functions
+
+    fn memory(&self) -> &[u8] {
+        let memory_ptr = self.retro_get_memory_data(2);
+        let memory_size = self.retro_get_memory_size(2);
+        unsafe {
+            std::slice::from_raw_parts(memory_ptr as *const u8, memory_size)
+        }
+    }
 }
 
 struct ProxyState {
     core: Option<Core>,
     environment_callback: Option<retro_environment_t>,
+}
+
+impl ProxyState {
+    pub fn core(&self) -> &Core {
+        self.core.as_ref().unwrap()
+    }
 }
 
 impl Default for ProxyState {
@@ -92,7 +122,7 @@ pub extern "C" fn retro_init() {
 #[no_mangle]
 pub extern "C" fn retro_get_system_info(info: *mut retro_system_info) {
     let state = PROXY_STATE.lock().unwrap();
-    
+
     if let Some(real_core) = &state.core {
         let func: Symbol<unsafe extern "C" fn(*mut retro_system_info)> =
             unsafe { real_core.lib.get(b"retro_get_system_info\0").unwrap() };
@@ -115,7 +145,7 @@ pub extern "C" fn retro_load_game(game_info: *const retro_game_info) -> bool {
 
     let info = unsafe { &*game_info };
     let rom_path = unsafe { CStr::from_ptr(info.path).to_str().unwrap() };
-    
+
     let (core_path, file_path) = parse_rom_path(rom_path);
 
     if let Some(file_path) = file_path {
@@ -167,18 +197,14 @@ fn parse_rom_path(rom_path: &str) -> (String, Option<String>) {
 }
 
 fn core_get_memory_data(address: usize) -> u8 {
-    let memory_ptr = retro_get_memory_data(2);
-    let memory_size = retro_get_memory_size(2);
-    unsafe {
-        let memory = std::slice::from_raw_parts(memory_ptr as *const u8, memory_size);
-        memory[address]
-    }    
+    let state = PROXY_STATE.lock().unwrap();
+    state.core().memory()[address]
 }
 
 macro_rules! forward_fn {
     ($name:ident, $ret:ty, $($arg:ident: $type:ty),*) => {
         #[no_mangle]
-        pub extern "C" fn $name($($arg: $type),*) -> $ret {        
+        pub extern "C" fn $name($($arg: $type),*) -> $ret {
             unsafe {
                 let state = PROXY_STATE.lock().unwrap();
                 let core = &state.core.as_ref().unwrap();
