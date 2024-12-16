@@ -132,6 +132,12 @@ html`
 `(document.querySelector("#evolution-paths"))
 
 async function update() {
+  let {u8: {status}} = await client.request("read_memory", {u8: {status: 0x1557b0}});
+
+  if (status == 0) {
+    return;
+  }
+
   const response = await client.request("read_memory", {
     u8: {
       happiness: 0x13848A,
