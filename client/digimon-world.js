@@ -20,7 +20,7 @@ export const stats = [
     discipline: html`<img src="img/discipline.png">&nbsp;<small>Disc.</small>`,
     battles: html`<img src="img/battle.png">&nbsp;<small>Battle</small>`,
     techs: html`<img src="img/techniques.png">&nbsp;<small>Techs</small>`,
-    partner: "",  
+    partner: "",
   }
 ];
 
@@ -209,14 +209,23 @@ export const evolutionRequirements = {
 }
 
 export function countTechs(techs) {
-  return countSetBits(techs.fire_techs) + 
-  countSetBits(techs.air_techs) + 
-  countSetBits(techs.ice_techs) + 
-  countSetBits(techs.mech_techs) + 
-  countSetBits(techs.earth_techs) + 
-  countSetBits(techs.battle_techs) + 
+  return countSetBits(techs.fire_techs) +
+  countSetBits(techs.air_techs) +
+  countSetBits(techs.ice_techs) +
+  countSetBits(techs.mech_techs) +
+  countSetBits(techs.earth_techs) +
+  countSetBits(techs.battle_techs) +
   countSetBits(techs.filth_techs) +
   countSetBits(techs.filth_techs_ext & 0xF);
+}
+
+export function timeUntilEvolution(evoTimer, digimonLevel) {
+  if (digimonLevel == 1) return 6 - evoTimer;
+  if (digimonLevel == 2) return 24 - evoTimer;
+  if (digimonLevel == 3) return 72 - evoTimer;
+  if (digimonLevel == 4) return 144 - evoTimer;
+
+  return Infinity;
 }
 
 function countSetBits(num) {

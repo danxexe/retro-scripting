@@ -1,5 +1,5 @@
 import { JSONRPCClient } from './json-rpc-2.0.js'
-import { stats, digimonNames, evolutionPaths, evolutionRequirements, countTechs} from './digimon-world.js'
+import { stats, digimonNames, evolutionPaths, evolutionRequirements, countTechs, timeUntilEvolution} from './digimon-world.js'
 import { reactive, html } from './arrow.js'
 
 const client = new JSONRPCClient((jsonRPCRequest) =>
@@ -64,6 +64,19 @@ function requirements_met(f) {
 
   return [stats, mistakes, weight, bonus].filter(met => met).length;
 }
+
+const top_bar_template = html`
+  <div class="table-outer">
+    <dl>
+      <dt><small>Tiredness</small></dt><dd>${() => state.partner.tiredness}</dd>
+      <dt><small>Food Timer</small></dt><dd>${() => state.partner.food_timer}</dd>
+      <dt><small>Poop Timer</small></dt><dd>${() => state.partner.poop_timer}</dd>
+      <dt><small>Sleep Timer</small></dt><dd>${() => state.partner.sleep_timer}</dd>
+      <dt><small>Evo Timer</small></dt><dd>${() => state.partner.time_until_evolution}</dd>
+      <dt><small>Life Timer</small></dt><dd>${() => state.partner.life_timer}</dd>
+    </dl>
+  </div>
+`(document.querySelector("#top-bar"))
 
 const digimon_template = (name, values, stats, compute_classes) => {
   return html`
@@ -140,11 +153,8 @@ async function update() {
 
   const response = await client.request("read_memory", {
     u8: {
-      happiness: 0x13848A,
-      discipline: 0x138488,
       mistakes: 0x13847e,
       weight: 0x1384a2,
-      battles: 0x1384b4,
       fire_techs: 0x155800,
       air_techs: 0x155801,
       ice_techs: 0x155802,
@@ -155,6 +165,7 @@ async function update() {
       filth_techs_ext: 0x155807,
     },
     u16le: {
+      digimon_type: 0x1557a8,
       digimon_id: 0x1557b0,
       off: 0x1557e0,
       def: 0x1557e2,
@@ -162,10 +173,28 @@ async function update() {
       brains: 0x1557e6,
       hp: 0x1557f0,
       mp: 0x1557f2,
+      happiness: 0x13848a,
+      discipline: 0x138488,
+      battles: 0x1384b4,
+      tiredness: 0x138482,
+      evo_timer: 0x1384B6,
+      life_timer: 0x1384A8,
+      poop_timer: 0x138478,
+      food_timer: 0x13849E,
+      sleep_timer: 0x138464,
     }
   });
-  
+
+  // TODO: This data is immutable and can be cached
+  const base_data = await client.request("read_memory", {
+    u16le: {
+      level: 0x12CED1 + response.u16le.digimon_type * 52,
+    }
+  });
+
   state.partner = reactive({ ...response["u8"], ...response["u16le"] });
+  // TODO: implement i16le on server side
+  state.partner.food_timer = (state.partner.food_timer << 16) >> 16
   state.partner.name = digimonNames.get(state.partner.digimon_id);
   state.partner.partner = state.partner.name;
   // state.partner.partner = "Biyomon";
@@ -180,6 +209,10 @@ async function update() {
       return {name: digimon, requirements, fulfillments}
     })
     .filter((path) => path.requirements.special == undefined);
+
+  // Loaded from base_data
+  state.partner.level = base_data.u16le.level;
+  state.partner.time_until_evolution = timeUntilEvolution(state.partner.evo_timer, state.partner.level)
 }
 
 function sleep(ms) {
