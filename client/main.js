@@ -195,6 +195,7 @@ async function update() {
   state.partner = reactive({ ...response["u8"], ...response["u16le"] });
   // TODO: implement i16le on server side
   state.partner.food_timer = (state.partner.food_timer << 16) >> 16
+  state.partner.poop_timer = (state.partner.poop_timer << 16) >> 16
   state.partner.name = digimonNames.get(state.partner.digimon_id);
   state.partner.partner = state.partner.name;
   // state.partner.partner = "Biyomon";
