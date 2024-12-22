@@ -90,8 +90,8 @@ export const digimonNames = new Map([
 
 export const evolutionPaths = {
   "Botamon": ["Koromon", "Sukamon"],
-  "Poyomon": ["Tokomon", "Sukamon"],
   "Punimon": ["Tsunomon", "Sukamon"],
+  "Poyomon": ["Tokomon", "Sukamon"],
   "Yuramon": ["Tanemon", "Sukamon"],
   "Koromon": ["Agumon", "Gabumon", "Kunemon", "Sukamon"],
   "Tokomon": ["Patamon", "Biyomon", "Kunemon", "Sukamon"],
@@ -153,6 +153,10 @@ export const evolutionPaths = {
 };
 
 export const evolutionRequirements = {
+  "Koromon": {},
+  "Tsunomon": {},
+  "Tokomon": {},
+  "Tanemon": {},
   "Agumon": { hp: 10, mp: 10, off: 1, mistakes: [0, Infinity], weight: [10, 20], partner: 'Koromon' },
   "Betamon": { hp: 10, mp: 10, def: 1, mistakes: [0, Infinity], weight: [10, 20], partner: 'Tanemon' },
   "Biyomon": { mp: 10, def: 1, speed: 1, mistakes: [0, Infinity], weight: [10, 20], partner: 'Tokomon' },
