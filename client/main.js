@@ -187,7 +187,7 @@ async function update() {
 
   // TODO: This data is immutable and can be cached
   const base_data = await client.request("read_memory", {
-    u16le: {
+    u8: {
       level: 0x12CED1 + response.u16le.digimon_type * 52,
     }
   });
@@ -212,7 +212,7 @@ async function update() {
     .filter((path) => path.requirements.special == undefined);
 
   // Loaded from base_data
-  state.partner.level = base_data.u16le.level;
+  state.partner.level = base_data.u8.level;
   state.partner.time_until_evolution = timeUntilEvolution(state.partner.evo_timer, state.partner.level)
 }
 
