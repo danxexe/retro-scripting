@@ -2,6 +2,11 @@
 name = "libretro-proxy"
 version = "0.1.0"
 edition = "2021"
+description = "Write libretro cores that act as a proxy to other cores."
+repository = "https://github.com/danxexe/retro-scripting"
+license = "MIT"
+keywords = ["libretro", "retroarch", "emulator", "core", "proxy"]
+categories = ["emulators", "external-ffi-bindings", "game-development", "development-tools::ffi"]
 
 [dependencies]
 rust-libretro-sys = "0.3.2"
