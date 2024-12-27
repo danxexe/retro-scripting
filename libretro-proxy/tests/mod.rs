@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use libretro_proxy::{Core, Proxy, retro_system_info};
+    use libretro_proxy::{Core, Proxy, sys::retro_system_info};
     use cargo_metadata::MetadataCommand;
     use glob::glob;
 

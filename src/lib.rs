@@ -38,7 +38,7 @@ impl LibretroProxy for ProxyState {
         &self.core
     }
 
-    fn retro_load_game(&self, game: *const libretro_proxy::retro_game_info) -> bool {
+    fn retro_load_game(&self, game: *const libretro_proxy::sys::retro_game_info) -> bool {
         let loaded = self.core().retro_load_game(game);
 
         if loaded {
