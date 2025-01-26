@@ -13,13 +13,70 @@
         margin: 1em;
       }
 
+      table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        margin: auto;
+      }
+
       td {
-        width: 10px;
-        height: 10px;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        border: 2px solid white;
+        /* box-shadow: 0 0 2px white; */
+        background-color: #888888;
+        color: #888888;
+        text-align: center;
+        position: relative;
+        /* z-index: 1; */
+      }
+
+      td::before {
+        content: "";
+        position: absolute;
+        box-sizing: border-box;
+        width: calc(100% + 4px);
+        height: calc(100% + 4px);
+        top: -2px;
+        left: -2px;
+        border: 2px solid white;
+        pointer-events: none;
       }
 
       td[data-value="ff"] {
         visibility: hidden;
+        border: 2px solid transparent;
+      }
+
+      td[data-key="cell-2-3"] {
+        border: 2px solid white;
+        box-shadow: 0 0 2px white;
+      }
+
+      td[data-key="cell-14-3"] {
+        background-color: #0101F9;
+        color: #0101F9;
+      }
+
+      @keyframes fade {
+        from { opacity: 1.0; }
+        50% { opacity: 0.1; }
+        to { opacity: 1.0; }
+      }
+
+      td[data-key="cell-14-3"]::after {
+        width: 33px;
+        height: 33px;
+        content: "A";
+        background-color: transparent;
+        position: absolute;
+        margin-left: -30px;
+        margin-top: -8px;
+        border: 4px dashed white;
+        animation:fade 1000ms infinite;
+        z-index: 1;
+        pointer-events: none;
       }
     </style>
   </head>

@@ -37,9 +37,11 @@ function buildTr(y) {
 
 function buildTd(y, x) {
   const value = state.map[y][x].toString(16).padStart(2, '0');
+  const display = value;
+  const key = `cell-${y}-${x}`;
   return html`
-  <td data-value="${() => value}">${() => value}</td>
-  `.key(`cell-${y}-${x}`)
+  <td data-key="${() => key}" data-value="${() => value}">${() => display}</td>
+  `.key(key)
 }
 
 html`
