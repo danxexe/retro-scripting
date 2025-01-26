@@ -1256,10 +1256,10 @@ static int rc_hash_jaguar_cd(char hash[33], const char* path)
     return rc_hash_error("Could not open track");
 
   /* The header is an unspecified distance into the first sector, but usually two bytes in.
-   * It consists of 64 bytes of "TAIR" or "ATRI" repeating, depending on whether or not the data 
+   * It consists of 64 bytes of "TAIR" or "ATRI" repeating, depending on whether or not the data
    * is byteswapped. Then another 32 byte that reads "ATARI APPROVED DATA HEADER ATRI "
    * (possibly byteswapped). Then a big-endian 32-bit value for the address where the boot code
-   * should be loaded, and a second big-endian 32-bit value for the size of the boot code. */ 
+   * should be loaded, and a second big-endian 32-bit value for the size of the boot code. */
   sector = rc_cd_first_track_sector(track_handle);
   rc_cd_read_sector(track_handle, sector, buffer, sizeof(buffer));
 
@@ -2697,7 +2697,7 @@ static int rc_hash_dreamcast(char hash[33], const char* path)
   return result;
 }
 
-static int rc_hash_find_playstation_executable(void* track_handle, const char* boot_key, const char* cdrom_prefix, 
+static int rc_hash_find_playstation_executable(void* track_handle, const char* boot_key, const char* cdrom_prefix,
                                                char exe_name[], uint32_t exe_name_size, uint32_t* exe_size)
 {
   uint8_t buffer[2048];
