@@ -68,12 +68,12 @@ html`
 `(document.querySelector(".container"))
 
 async function setup() {
-  const adresses = Object.fromEntries(Array(1024).keys().map(i => [i, 0x0254E + i]));
+  const map_addr = Object.fromEntries(Array(1024).keys().map(i => [i, 0x0254E + i]));
 
   let {
     u8: map,
   } = await client.request("read_rom", {
-    u8: adresses
+    u8: map_addr
   });
 
   for (let y = 0; y < 32; y++) {
@@ -82,6 +82,82 @@ async function setup() {
       state.map[y][x] = cell;
     }
   }
+
+  // TODO: The length is hardcoded for the original game.
+  // Needs to be parsed dinamically if we wish to support rom hacks.
+  const brinstar_item_data_addr = Object.fromEntries(Array(106).keys().map(i => [i, 0x063E6 + i]));
+
+  let {
+    u8: brinstar_item_data,
+  } = await client.request("read_rom", {
+    u8: brinstar_item_data_addr
+  });
+
+  let items = parseItemData(Object.values(brinstar_item_data))
+
+  console.log(items)
+}
+
+function parseItemData(data) {
+  let items = [];
+  let item = {};
+
+  while (data.length > 0) {
+
+    item.y = data.shift();
+    data.shift(); data.shift(); // Drop the next y pointer, we don't need it
+
+    let hasNext = true;
+    do {
+      item.x = data.shift();
+      hasNext = data.shift() != 0xFF;
+      item.type = data.shift();
+
+      switch (item.type) {
+        case 0x1: // Squeept
+          // TODO
+          break;
+        case 0x2: // Power up
+          item.data = [data.shift(), data.shift()];
+          data.shift(); // 0x00 terminator
+          break;
+        case 0x3: // Mellows
+          data.shift(); // 0x00 terminator
+          break;
+        case 0x4: // Elevator
+          item.data = [data.shift()];
+          data.shift(); // 0x00 terminator
+          break;
+        case 0x5: // Mother brain room cannon
+          // TODO
+          break;
+        case 0x6: // Mother brain
+          // TODO
+          break;
+        case 0x7: // Zeebetite
+          // TODO
+          break;
+        case 0x8: // Rinka
+          // TODO
+          break;
+        case 0x9: // Door
+          // TODO
+          break;
+        case 0xA: // Palette change room
+          data.shift(); // 0x00 terminator
+          break;
+
+        default:
+          break;
+      }
+
+      items.push(item);
+      item = {y: item.y};
+
+    } while (hasNext);
+  }
+
+  return items;
 }
 
 async function update() {
