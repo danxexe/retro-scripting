@@ -54,8 +54,13 @@ function buildTd(y, x) {
   `.key(key)
 }
 
+function toggleVisited() {
+  document.querySelector('table').classList.toggle("hide-unvisited");
+}
+
 html`
-  <table>
+  <button @click="${toggleVisited}">Show / hide unexplored</button>
+  <table class="hide-unvisited">
     ${() => state.map.map(
       (_, y) => buildTr(y)
     )}
