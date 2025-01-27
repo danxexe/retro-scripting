@@ -94,11 +94,14 @@ async function update() {
     }
   });
 
-  if (state.position != position) {
+  if (state.position.y != position.y || state.position.x != position.x) {
     state.position = position;
     const visited = Reflect.getPrototypeOf(state.visited)
-    visited.add(position.y * 32 + position.x);
-    state.visited = visited;
+    const index = position.y * 32 + position.x;
+    if (!visited.has(index)) {
+      visited.add(index);
+      state.visited = visited;
+    }
   }
 }
 
