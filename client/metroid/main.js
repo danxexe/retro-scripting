@@ -21,6 +21,7 @@ const client = new JSONRPCClient((jsonRPCRequest) =>
 
 let state = reactive({
   map: Array(32).fill(Array(32).fill(255)),
+  position: {y: 0, x: 0}
 });
 
 window.state = state;
@@ -39,8 +40,10 @@ function buildTd(y, x) {
   const value = state.map[y][x].toString(16).padStart(2, '0');
   const display = value;
   const key = `cell-${y}-${x}`;
+  const isCurrent = state.position.x == x && state.position.y == y;
+
   return html`
-  <td data-key="${() => key}" data-value="${() => value}">${() => display}</td>
+  <td data-key="${() => key}" data-value="${() => value}" class="${() => isCurrent ? "current" : ""}">${() => display}</td>
   `.key(key)
 }
 
@@ -70,6 +73,16 @@ async function setup() {
 }
 
 async function update() {
+  let {
+    u8: position,
+  } = await client.request("read_memory", {
+    u8: {
+      y: 0x4F,
+      x: 0x50,
+    }
+  });
+
+  state.position = position;
 }
 
 function sleep(ms) {
@@ -87,7 +100,7 @@ async function loop() {
       console.log(e)
     }
 
-    await sleep(1000);
+    await sleep(250);
   }
 }
 
