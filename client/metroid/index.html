@@ -54,7 +54,7 @@
         box-shadow: 0 0 2px white;
       }
 
-      td.visited {
+      td[data-visited="true"] {
         background-color: #0101F9;
         color: #0101F9;
       }
@@ -65,7 +65,7 @@
         to { opacity: 1.0; }
       }
 
-      td.current::after {
+      td[data-current="true"]::after {
         width: 33px;
         height: 33px;
         content: "A";

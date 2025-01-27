@@ -21,7 +21,8 @@ const client = new JSONRPCClient((jsonRPCRequest) =>
 
 let state = reactive({
   map: Array(32).fill(Array(32).fill(255)),
-  position: {y: 0, x: 0}
+  position: {y: 0, x: 0},
+  visited: new Set([]),
 });
 
 window.state = state;
@@ -41,9 +42,15 @@ function buildTd(y, x) {
   const display = value;
   const key = `cell-${y}-${x}`;
   const isCurrent = state.position.x == x && state.position.y == y;
+  const isVisited = Reflect.getPrototypeOf(state.visited).has(y * 32 + x)
 
   return html`
-  <td data-key="${() => key}" data-value="${() => value}" class="${() => isCurrent ? "current" : ""}">${() => display}</td>
+  <td
+    data-key="${() => key}"
+    data-value="${() => value}"
+    data-current="${() => isCurrent}"
+    data-visited="${() => isVisited}"
+  >${() => display}</td>
   `.key(key)
 }
 
@@ -82,7 +89,12 @@ async function update() {
     }
   });
 
-  state.position = position;
+  if (state.position != position) {
+    state.position = position;
+    const visited = Reflect.getPrototypeOf(state.visited)
+    visited.add(position.y * 32 + position.x);
+    state.visited = visited;
+  }
 }
 
 function sleep(ms) {
